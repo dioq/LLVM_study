@@ -10,66 +10,45 @@ process connect connect://<host>:<port>
 process connect connect://127.0.0.1:8090
 
 ## 调试命令
-b [vmaddr]	                # breakpoint 对内存地址下断点
-c	                        # continue 程序继续执行
-po                          # print object 常用于查看对象信息
+breakpoint [vmaddr]	        # b 对内存地址下断点
+continue	                # c 程序继续执行
+print object                # po 常用于查看对象信息
 breakpoint set -n [symbol]  # 给某函数下断点,可以连用形成断点组 breakpoint set -n "[类名 SEL]" -n "[类名 SEL]" ...
 breakpoint list             # 查看当前断点列表
 image list	                # 列出所有加载的模块
 image list -o -f [module]	# 只列出输入模块名信息
-bt	                        # thread backtrace 查看当前调用栈
+thread backtrace	        # bt 查看当前调用栈
 
+### memory read
+memory read 简写 x
+Command Options Usage:
+size指定内存块（block/item）的大小，默认为1byte。
+-s(--size)：The size in bytes to use when displaying with the selected format.
+count指定内存块（block/item）的个数，可配合起始地址使用。
+-c(--count)：The number of total items to display.
+format指定内容显示格式，格式符同print：c-char，s-string，d-decimal，x-hex。
+-f(--format)：Specify a format to be used for display.
+--outfile : 把读取到的数据输出
 
+#### 起始地址到结束地址
+memory read [start vmaddr] [end vmaddr]
+如:
+memory read 0x104e7d620 0x104e7d680
+#### 起始地址 + 内存块count
+memory read [start vmaddr] -c [byte count]
+如:
+memory read 0x104e7d620 -c 0x60
+#### 起始地址 + 内存块size + 内存块count（dump hex format）
+memory read [start vmaddr] -s [block size] -c [block count] -f [form]
+如:
+memory read 0x1008ad620 -s 16 -c 0x6 -f x
+#### --outfile 输出读取到的数据
+memory read [start vmaddr] -c [byte count] --outfile [path]
+如:
+memory read 0x1008ad620 -c 0x60 --outfile /tmp/mem.txt
 
-禁用(启用)某一组(某一个)断点
-breakpoint disable(enable)  组号(编号)
-禁用某一个断点
-breakpoint delete  编号	        
-删除某一组断点
-breakpoint delete  组号	        
-删除所有断点
-breakpoint delete	            
-全局方法断点,工程所有该方法都会下断点
-breakpoint set --selectore 方法名	
-给.m实现文件某个方法下断点
-brepoint set --file 文件名.m --selector 方法名	
-遍历整个工程，含该字串的方法、函数都会下断点
-breakpoint set -r 字符串	
-某标号断点过后执行相应命令，以Done结束，类似于Xcode界面Edit breakpoint
-breakpoint command add 标号	
-列出断点过后执行的命令
-breakpoint command list 标号	
-删除断点过后执行的命令
-breakpoint command delete	
-暂停程序
-process interrput	
-up	查看上一个调用函数
-down	查看下一个调用函数
-frame variable	查看函数参数
-frame select 标号	查看指定调用函数
-dis -a $pc	反汇编指定地址,此处为pc寄存器对应地址
-thread info	输出当前线程信息
-b trace -c xxx	满足某个条件后中断
-target stop-hook add -o "frame variable"	断点进入后默认做的操作,这里是打印参数
-help 指令	查看指令信息
-
-n	将子函数整体一步执行，源码级别
-s	跳进子函数一步一步执行，源码级别
-ni	跳到下一条指令,汇编级别
-si	跳到当前指令内部，汇编级别
-finish	返回上层调用栈
-thread return	不再执行往下代码，直接从当前调用栈返回一个值
-register read	读取所有寄存器值
-register read $x0	读取x0寄存器值
-register write $x1 10	修改x1寄存器的值为10
-p/x	以十六进制形式读取值，读取的对象可以很多
-watchpoint set variable p->_name	给属性添加内存断点，属性改变时会触发断点，可以看到属性的新旧值，类似KVO效果
-watchpoint set expression 变量内存地址	效果同上
-
-大部分命令可以缩写，这里列出部分几个，可以多尝试缩写，用多了就自然记住了:
-
-breakpoint :br、b
-list:li
-delete:del
-disable:dis
-enable:ena
+### memory write
+#### 起始地址 + 内存块size + 数据
+memory write [start vmaddr] -s [block size] [hex string]
+如:
+memory write 0x10015d620 -s 0x4 0x10203040
