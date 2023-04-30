@@ -1,9 +1,13 @@
 # lldb调试
 
 ## 打开lldb 并附加到指定进程
-shell中操作
-lldb				        # 打开lldb
-process attach --pid [pid]	# 附加到待调试的进程
+lldb                        # 打开lldb				        
+### 调试本地进程
+process attach --pid [pid]	# 附加到本地进程
+### 调试远程进程
+process connect connect://<host>:<port>
+如:
+process connect connect://127.0.0.1:8090
 
 ## 调试命令
 b [vmaddr]	                # breakpoint 对内存地址下断点
